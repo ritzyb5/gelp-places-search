@@ -8,6 +8,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.RatingBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -57,7 +58,7 @@ public class InfoTab extends Fragment {
             TextView address = view.findViewById(R.id.addrTextView);
             TextView phone_number = view.findViewById(R.id.phNumTextView);
             TextView price_level = view.findViewById(R.id.priceLevelTextView);
-            TextView rating = view.findViewById(R.id.ratingTextView);
+            RatingBar rating = view.findViewById(R.id.ratingTextView);
             TextView website_url = view.findViewById(R.id.websiteTextView);
             TextView googlePage_url = view.findViewById(R.id.gPageTextView);
 
@@ -75,7 +76,10 @@ public class InfoTab extends Fragment {
             }
             price_level.setText(strPriceLevel);
 
-            rating.setText(Double.toString(jsonObject.getDouble("rating")));
+            Double rate_val = jsonObject.getDouble("rating");
+            Float rate_float = rate_val.floatValue();
+            rating.setRating(rate_float);
+
             website_url.setText(jsonObject.getString("website"));
             googlePage_url.setText(jsonObject.getString("url"));
 

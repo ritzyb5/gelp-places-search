@@ -2,6 +2,7 @@ package com.cs571.barakol.placessearch;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.design.widget.TabLayout;
 import android.support.v7.app.AppCompatActivity;
@@ -65,16 +66,21 @@ public class PlaceDetailsActivity extends AppCompatActivity {
     private String place_id;
     private String place_name;
     private JSONObject jsonObject;
+    private CustomSharedPreference customSharedPreference;
+    ArrayList<PlacesSearchResult> placesResultsList;
+    int clickedPos;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        customSharedPreference = new CustomSharedPreference();
+
         setContentView(R.layout.activity_place_details);
 
         Intent i = getIntent();
-        int clickedPos = i.getIntExtra("position",0);
+        clickedPos = i.getIntExtra("position",0);
 
-        ArrayList<PlacesSearchResult> placesResultsList =  i.getParcelableArrayListExtra("resultList");
+        placesResultsList =  i.getParcelableArrayListExtra("resultList");
         place_name = placesResultsList.get(clickedPos).getPlaceName();
         place_id = placesResultsList.get(clickedPos).getPlaceId();
 
@@ -82,16 +88,30 @@ public class PlaceDetailsActivity extends AppCompatActivity {
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setTitle(place_name);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
         mViewPager = (ViewPager) findViewById(R.id.detailsContainer);
 
         requestData();
 
         tabLayout = (TabLayout) findViewById(R.id.detailsTabs);
+//        tabLayout.setTabMode(TabLayout.MODE_SCROLLABLE);
+        tabLayout.getTabAt(0).setIcon(R.drawable.info_outline);
+        tabLayout.getTabAt(1).setIcon(R.drawable.photos);
+        tabLayout.getTabAt(2).setIcon(R.drawable.map);
+        tabLayout.getTabAt(3).setIcon(R.drawable.reviews);
 
         mViewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
         tabLayout.addOnTabSelectedListener(new TabLayout.ViewPagerOnTabSelectedListener(mViewPager));
 
     }
+
+    @Override
+    public boolean onSupportNavigateUp() {
+        finish();
+        return true;
+    }
+
 
     private void requestData(){
         String URL_DATA = getString(R.string.url) +"/reqPlaceDetails?placeid="+place_id;
@@ -153,8 +173,14 @@ public class PlaceDetailsActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
+        //Change fav button icon based if place is fav
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_place_details, menu);
+        if(checkFavoriteItem(placesResultsList.get(clickedPos))){
+            MenuItem item = menu.getItem(1);
+            item.setIcon(R.drawable.fav_icon);
+            item.setTitle(R.string.fav);
+        }
         return true;
     }
 
@@ -170,7 +196,60 @@ public class PlaceDetailsActivity extends AppCompatActivity {
             return true;
         }
 
+        if(id == R.id.fav_menuBtn){
+            String title = item.getTitle().toString();
+
+            if(title == getResources().getString(R.string.no_fav)){
+                item.setTitle(R.string.fav);
+
+                customSharedPreference.addFavorite(this, placesResultsList.get(clickedPos));
+
+                Toast.makeText(this,
+                        place_name+" "+this.getResources().getString(R.string.add_fav),
+                        Toast.LENGTH_SHORT).show();
+
+                item.setIcon(R.drawable.fav_icon);
+            }
+            else{
+                customSharedPreference.removeFavorite(this, placesResultsList.get(clickedPos));
+
+                item.setTitle(R.string.no_fav);
+                item.setIcon(R.drawable.heart_outline_white);
+
+                Toast.makeText(this,
+                        place_name+" "+this.getResources().getString(R.string.remove_fav),
+                        Toast.LENGTH_SHORT).show();
+            }
+        }
+
+        //Twitter Intent
+        if(id == R.id.share_twitter){
+            String format_name = placeDetailsObj.getPlace_name().replace(' ','+');
+            String format_addr = placeDetailsObj.getAddress().replace(' ','+');
+            String url = placeDetailsObj.getWeb_url();
+            String text = "text=Check+out+"+format_name+"+located+at+" +format_addr+".+Website:+"+url+"+&hashtags=TravelAndEntertainmentSearch";
+
+            Intent twitter_intent = new Intent(Intent.ACTION_VIEW,Uri.parse(getString(R.string.twitter_link)+text));
+            this.startActivity(twitter_intent);
+        }
+
         return super.onOptionsItemSelected(item);
+    }
+
+    /*Checks whether a particular product exists in SharedPreferences*/
+    public boolean checkFavoriteItem(PlacesSearchResult checkPlace) {
+        boolean check = false;
+        List<PlacesSearchResult> favorites = customSharedPreference.getFavorites(this);
+        if (favorites != null) {
+            for (PlacesSearchResult place : favorites) {
+                if (place.equals(checkPlace)) {
+                    Log.i("FAVS","equal");
+                    check = true;
+                    break;
+                }
+            }
+        }
+        return check;
     }
 
     /**

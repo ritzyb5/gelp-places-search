@@ -36,25 +36,29 @@
                 android:id="@+id/infoTab"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/info" />
+                android:text="@string/info"
+                android:icon="@drawable/info_outline"/>
 
             <android.support.design.widget.TabItem
                 android:id="@+id/photosTab"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/photos" />
+                android:text="@string/photos"
+                android:icon="@drawable/photos"/>
 
             <android.support.design.widget.TabItem
                 android:id="@+id/mapTab"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/map" />
+                android:text="@string/map"
+                android:icon="@drawable/map"/>
 
             <android.support.design.widget.TabItem
                 android:id="@+id/reviewsTab"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/reviews" />
+                android:text="@string/reviews"
+                android:icon="@drawable/reviews"/>
 
         </android.support.design.widget.TabLayout>
     </android.support.design.widget.AppBarLayout>

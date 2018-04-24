@@ -10,6 +10,7 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.GridLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 
@@ -67,15 +68,17 @@ public class PhotosTab extends Fragment {
                         public void onComplete(@NonNull Task<PlacePhotoResponse> task) {
                             PlacePhotoResponse photo = task.getResult();
                             Bitmap bitmap = photo.getBitmap();
-
                             ImageView image = new ImageView(getContext());
+
                             image.setImageBitmap(bitmap);
-                            image.setPadding(0,20,0,20);
-                            image.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-                            image.getLayoutParams().width = ViewGroup.LayoutParams.MATCH_PARENT;
+                            image.setPadding(20,20,20,20);
+                            image.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
+                            image.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
+                            image.setAdjustViewBounds(true);
+                            // image.getLayoutParams().width = ViewGroup.LayoutParams.MATCH_PARENT;
 //                            image.setScaleType(ImageView.ScaleType.FIT_XY);
                             LinearLayout layout =  getActivity().findViewById(R.id.photosTab);
-                            layout.addView(image);
+                              layout.addView(image);
                         }
                     });
                 }

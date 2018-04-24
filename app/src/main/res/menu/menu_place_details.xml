@@ -2,9 +2,20 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="com.cs571.barakol.placessearch.PlaceDetailsActivity">
+
     <item
-        android:id="@+id/action_settings"
+        android:id="@+id/share_twitter"
         android:orderInCategory="100"
-        android:title="@string/action_settings"
-        app:showAsAction="never" />
+        android:title="@string/share"
+        android:icon="@drawable/share"
+        app:showAsAction="always" />
+
+    <item
+        android:id="@+id/fav_menuBtn"
+        android:orderInCategory="200"
+        android:icon="@drawable/heart_outline_white"
+        android:title="@string/no_fav"
+        app:showAsAction="always" />
+
+
 </menu>

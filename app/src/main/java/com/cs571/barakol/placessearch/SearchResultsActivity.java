@@ -8,6 +8,8 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.AttributeSet;
+import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 
@@ -17,6 +19,7 @@ public class SearchResultsActivity extends AppCompatActivity{
     private RecyclerView mRecyclerView;
     private RecyclerView.Adapter adapter;
     private CustomSharedPreference customSharedPreference;
+    private ArrayList<PlacesSearchResult> placesResultsList;
 
 
     @Override
@@ -36,12 +39,25 @@ public class SearchResultsActivity extends AppCompatActivity{
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
 
-        ArrayList<PlacesSearchResult> placesResultsList =  i.getParcelableArrayListExtra("placesJSON");
+        placesResultsList =  i.getParcelableArrayListExtra("placesJSON");
 
         mRecyclerView = (RecyclerView) findViewById(R.id.placesResultView);
         mRecyclerView.setHasFixedSize(true);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
 
+        adapter = new PlacesSearchResultAdapter(getApplicationContext(),placesResultsList,"detailsTab");
+        mRecyclerView.setAdapter(adapter);
+    }
+
+    @Override
+    public boolean onSupportNavigateUp() {
+        finish();
+        return true;
+    }
+
+    @Override
+    protected void onPostResume() {
+        super.onPostResume();
         adapter = new PlacesSearchResultAdapter(getApplicationContext(),placesResultsList,"detailsTab");
         mRecyclerView.setAdapter(adapter);
     }
