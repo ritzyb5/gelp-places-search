@@ -1,13 +1,20 @@
 package com.cs571.barakol.placessearch;
 
+import android.content.Context;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.RatingBar;
 import android.widget.TextView;
 
 import com.cs571.barakol.placessearch.dummy.DummyContent.DummyItem;
+import com.squareup.picasso.Picasso;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -17,9 +24,10 @@ import java.util.List;
  */
 public class MyReviewsRecyclerViewAdapter extends RecyclerView.Adapter<MyReviewsRecyclerViewAdapter.ViewHolder> {
 
-    private final List<DummyItem> mValues;
+    private final List<CustomReviewDetails> mValues;
 
-    public MyReviewsRecyclerViewAdapter(List<DummyItem> items) {
+
+    public MyReviewsRecyclerViewAdapter(List<CustomReviewDetails> items) {
         mValues = items;
     }
 
@@ -32,8 +40,18 @@ public class MyReviewsRecyclerViewAdapter extends RecyclerView.Adapter<MyReviews
 
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
-        holder.mItem = mValues.get(position);
+        CustomReviewDetails review = mValues.get(position);
 
+        Picasso.get().load(review.getImage_url()).into(holder.image_url);
+
+        holder.author_name.setText(review.getAuthor_name());
+        holder.review_rating.setRating(review.getReview_rating());
+
+        Date rating_date = new Date(Long.parseLong(review.getReview_date()));
+        DateFormat formatted_rating_date = new SimpleDateFormat("yyyy-mm-dd HH:mm:ss");
+        holder.review_date.setText(formatted_rating_date.format(rating_date));
+
+        holder.review_text.setText(review.getReview_text());
 
     }
 
@@ -43,13 +61,26 @@ public class MyReviewsRecyclerViewAdapter extends RecyclerView.Adapter<MyReviews
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
-        public final View mView;
+        private ImageView image_url;
+        private TextView author_name;
+        private RatingBar review_rating;
+        private  TextView review_date;
+        private  TextView review_text;
+        private final Context context;
 
         public DummyItem mItem;
 
         public ViewHolder(View view) {
             super(view);
-            mView = view;
+//            mView = view;
+
+            image_url = view.findViewById(R.id.authorImage);
+            author_name = view.findViewById(R.id.authorName);
+            review_rating = view.findViewById(R.id.reviewRating);
+            review_date = view.findViewById(R.id.reviewDate);
+            review_text = view.findViewById(R.id.reviewText);
+
+            context = view.getContext();
 
         }
     }

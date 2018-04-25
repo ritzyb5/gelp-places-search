@@ -147,7 +147,7 @@ public class PlaceDetailsActivity extends AppCompatActivity {
                 photosTab.setArguments(bundle);
                 mFragmentList.add(photosTab);
                 mFragmentList.add(MapTab.newInstance(jsonObject.toString()));
-                mFragmentList.add(InfoTab.newInstance(jsonObject.toString()));//Add reviews tab here
+                mFragmentList.add(ReviewsTab.newInstance(jsonObject.toString()));//Add reviews tab here
 
                 //Add Titles
                 mFragmentTitleList.add("Info");
