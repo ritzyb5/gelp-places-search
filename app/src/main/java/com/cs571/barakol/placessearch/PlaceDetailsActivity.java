@@ -20,6 +20,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -133,6 +134,7 @@ public class PlaceDetailsActivity extends AppCompatActivity {
                     placeDetailsObj = new CustomPlaceDetails(jsonObject.getString("place_id"),jsonObject.getString("name"),jsonObject.getString("formatted_address"),
                             jsonObject.getString("international_phone_number"),jsonObject.getInt("price_level"),jsonObject.getDouble("rating")
                             ,jsonObject.getString("url"),jsonObject.getString("website"));
+
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -281,8 +283,18 @@ public class PlaceDetailsActivity extends AppCompatActivity {
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
             View rootView = inflater.inflate(R.layout.fragment_place_details_info, container, false);
+//            Button nextBtn = rootView.findViewById(R.id.searchResultNextBtn);
+//            nextBtn.setOnClickListener(new View.OnClickListener() {
+//                @Override
+//                public void onClick(View view) {
+//
+//                }
+//            });
+
+
             return rootView;
         }
+
     }
 
     /**

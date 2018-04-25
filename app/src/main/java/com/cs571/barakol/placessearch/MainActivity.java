@@ -85,6 +85,7 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+
     private void setupViewPager(ViewPager viewPager) {
         ViewPagerAdapter adapter = new ViewPagerAdapter(getSupportFragmentManager(), MainActivity.this);
         adapter.addFragment(new SearchTab(), "SEARCH");

@@ -128,14 +128,16 @@
             android:layout_marginBottom="10dp"
             android:layout_weight="1"
             android:checked="true"
-            android:text="@string/curr_loc" />
+            android:text="@string/curr_loc"
+            android:onClick="onRadioButtonClicked"/>
 
         <RadioButton
             android:id="@+id/from_loc"
             android:layout_width="227dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="@string/other_loc" />
+            android:text="@string/other_loc"
+            android:onClick="onRadioButtonClicked"/>
     </RadioGroup>
 
     <TextView

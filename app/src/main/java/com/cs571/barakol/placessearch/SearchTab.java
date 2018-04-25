@@ -156,7 +156,10 @@ public class SearchTab extends Fragment implements LocationListener{
                                     searchResultList.add(places);
                                     Log.i("PLACE","Name: "+places.getPlaceName()+"ID: "+places.getPlaceId()+" Address: "+places.getAddress()+"Icon: "+places.getImage_url());
                                 }
+
+                                String next_page_token = jsonObject.getString("next_page_token");
                                 Intent intent = new Intent(getActivity(),SearchResultsActivity.class);
+                                intent.putExtra("next_page_token",next_page_token);
                                 intent.putParcelableArrayListExtra("placesJSON", searchResultList);
                                 startActivity(intent);
 
@@ -265,4 +268,5 @@ public class SearchTab extends Fragment implements LocationListener{
 
         searchResultList = new ArrayList<PlacesSearchResult>();
     }
+
 }
