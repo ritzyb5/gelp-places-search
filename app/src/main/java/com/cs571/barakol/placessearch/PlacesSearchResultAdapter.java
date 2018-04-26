@@ -75,7 +75,40 @@ public class PlacesSearchResultAdapter extends RecyclerView.Adapter<PlacesSearch
             context = itemView.getContext();
 
             itemView.setOnClickListener(this);
-            itemView.setOnLongClickListener(this);
+//            itemView.setOnLongClickListener(this);
+            favImageView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    int position = getAdapterPosition();
+                    ImageView favBtn = view.findViewById(R.id.favImageView);
+                    String tag = favBtn.getTag().toString();
+                    String place_name = mPlacesSearchResultList.get(position).getPlaceName()+" ";
+
+                    if (tag.equalsIgnoreCase("white")) {
+                        customSharedPreference.addFavorite(context, mPlacesSearchResultList.get(position));
+
+                        Toast.makeText(context,
+                                place_name+context.getResources().getString(R.string.add_fav),
+                                Toast.LENGTH_SHORT).show();
+
+                        favBtn.setTag("red");
+                        favBtn.setImageResource(R.drawable.heart_fill_red);
+                    } else {
+                        customSharedPreference.removeFavorite(context, mPlacesSearchResultList.get(position));
+
+                        if(tabName=="favTab"){
+                            mPlacesSearchResultList.remove(position);
+                            notifyDataSetChanged();
+                        }
+
+                        favBtn.setTag("white");
+                        favBtn.setImageResource(R.drawable.heart_outline_black);
+                        Toast.makeText(context,
+                                place_name+context.getResources().getString(R.string.remove_fav),
+                                Toast.LENGTH_SHORT).show();
+                    }
+                }
+            });
         }
 
         @Override

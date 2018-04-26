@@ -32,6 +32,8 @@
         app:layout_constraintStart_toEndOf="@+id/reviewType"
         app:layout_constraintTop_toTopOf="parent" />
 
+
+
     <android.support.v7.widget.RecyclerView
         android:id="@+id/list"
         android:name="com.cs571.barakol.placessearch.ReviewsFragment"
