@@ -1,6 +1,9 @@
 package com.cs571.barakol.placessearch;
 
-public class CustomReviewDetails {
+import android.support.annotation.NonNull;
+
+
+public class CustomReviewDetails{
     private String image_url;
     private String author_name;
     private Float review_rating;
@@ -40,4 +43,5 @@ public class CustomReviewDetails {
     public String getReview_url() {
         return review_url;
     }
+
 }

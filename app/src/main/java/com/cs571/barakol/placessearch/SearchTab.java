@@ -69,6 +69,7 @@ public class SearchTab extends Fragment implements LocationListener{
                 Log.i("MYERR","CLICKED");
                 EditText keywordTxt = getActivity().findViewById(R.id.keyword_txt);
                 RadioButton locRadioBtn = getActivity().findViewById(R.id.from_loc);
+                searchResultList = new ArrayList<>();
 
                 URL_DATA = getString(R.string.url);
 

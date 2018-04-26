@@ -25,10 +25,12 @@ import java.util.List;
 public class MyReviewsRecyclerViewAdapter extends RecyclerView.Adapter<MyReviewsRecyclerViewAdapter.ViewHolder> {
 
     private final List<CustomReviewDetails> mValues;
+    private String reviewType;
 
 
-    public MyReviewsRecyclerViewAdapter(List<CustomReviewDetails> items) {
+    public MyReviewsRecyclerViewAdapter(List<CustomReviewDetails> items, String type) {
         mValues = items;
+        reviewType = type;
     }
 
     @Override
@@ -42,14 +44,17 @@ public class MyReviewsRecyclerViewAdapter extends RecyclerView.Adapter<MyReviews
     public void onBindViewHolder(final ViewHolder holder, int position) {
         CustomReviewDetails review = mValues.get(position);
 
-        Picasso.get().load(review.getImage_url()).into(holder.image_url);
+        if(reviewType.equals("google_reviews"))
+            Picasso.get().load(review.getImage_url()).into(holder.image_url);
+        else
+            Picasso.get().load(review.getImage_url()).transform(new CircleTransform()).into((holder.image_url));
 
         holder.author_name.setText(review.getAuthor_name());
         holder.review_rating.setRating(review.getReview_rating());
 
-        Date rating_date = new Date(Long.parseLong(review.getReview_date()));
-        DateFormat formatted_rating_date = new SimpleDateFormat("yyyy-mm-dd HH:mm:ss");
-        holder.review_date.setText(formatted_rating_date.format(rating_date));
+//        Date rating_date = new Date(Long.parseLong(review.getReview_date()));
+//        DateFormat formatted_rating_date = new SimpleDateFormat("yyyy-mm-dd HH:mm:ss");
+        holder.review_date.setText(review.getReview_date());
 
         holder.review_text.setText(review.getReview_text());
 
