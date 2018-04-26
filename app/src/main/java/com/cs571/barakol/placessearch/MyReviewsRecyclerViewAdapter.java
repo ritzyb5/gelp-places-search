@@ -1,6 +1,8 @@
 package com.cs571.barakol.placessearch;
 
 import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -65,7 +67,7 @@ public class MyReviewsRecyclerViewAdapter extends RecyclerView.Adapter<MyReviews
         return mValues.size();
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder {
+    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
         private ImageView image_url;
         private TextView author_name;
         private RatingBar review_rating;
@@ -77,7 +79,6 @@ public class MyReviewsRecyclerViewAdapter extends RecyclerView.Adapter<MyReviews
 
         public ViewHolder(View view) {
             super(view);
-//            mView = view;
 
             image_url = view.findViewById(R.id.authorImage);
             author_name = view.findViewById(R.id.authorName);
@@ -87,6 +88,16 @@ public class MyReviewsRecyclerViewAdapter extends RecyclerView.Adapter<MyReviews
 
             context = view.getContext();
 
+            view.setOnClickListener(this);
+
+        }
+
+        @Override
+        public void onClick(View view) {
+            int position = getAdapterPosition();
+
+            Intent review_url_intent = new Intent(Intent.ACTION_VIEW, Uri.parse(mValues.get(position).getReview_url()));
+            context.startActivity(review_url_intent);
         }
     }
 }

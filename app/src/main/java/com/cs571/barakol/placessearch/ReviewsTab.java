@@ -12,7 +12,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.LinearLayout;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.Request;
@@ -57,6 +59,8 @@ public class ReviewsTab extends Fragment {
     private Context context;
     private String reviewTypeVal;
     private String orderType="Default Order";
+    private  boolean noGoogleReviews;
+    private boolean noYelpReviews;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -84,6 +88,9 @@ public class ReviewsTab extends Fragment {
 
         def_googleReviews = new ArrayList<>();
         def_yelpReviews = new ArrayList<>();
+
+        noGoogleReviews = false;
+        noYelpReviews = false;
 
         if (getArguments() != null) {
             jsonStr = getArguments().getString("PLACES_JSON");
@@ -119,23 +126,27 @@ public class ReviewsTab extends Fragment {
             Log.i("YELP_URL",URL_DATA);
 
             JSONArray reviewsArr =jsonObject.getJSONArray("reviews");
+            if(reviewsArr.length()>0){
+                for(int i=0; i<reviewsArr.length(); i++){
+                    JSONObject reviewsObj = reviewsArr.getJSONObject(i);
 
-            for(int i=0; i<reviewsArr.length(); i++){
-                JSONObject reviewsObj = reviewsArr.getJSONObject(i);
+                    //Rating
+                    Double rate_val = reviewsObj.getDouble("rating");
+                    Float rate_float = rate_val.floatValue();
 
-                //Rating
-                Double rate_val = reviewsObj.getDouble("rating");
-                Float rate_float = rate_val.floatValue();
+                    //Date
+                    Date rating_date = new Date((Long.parseLong(reviewsObj.getString("time")))*1000);
+                    DateFormat formatted_rating_date = new SimpleDateFormat("yyyy-mm-dd HH:mm:ss");
 
-                //Date
-                Date rating_date = new Date((Long.parseLong(reviewsObj.getString("time")))*1000);
-                DateFormat formatted_rating_date = new SimpleDateFormat("yyyy-mm-dd HH:mm:ss");
-
-                CustomReviewDetails review = new CustomReviewDetails(reviewsObj.getString("profile_photo_url"),reviewsObj.getString("author_name"),rate_float, formatted_rating_date.format(rating_date),reviewsObj.getString("text"),reviewsObj.getString("author_url"));
-                googleReviews.add(review);
-                def_googleReviews.add(review);
+                    CustomReviewDetails review = new CustomReviewDetails(reviewsObj.getString("profile_photo_url"),reviewsObj.getString("author_name"),rate_float, formatted_rating_date.format(rating_date),reviewsObj.getString("text"),reviewsObj.getString("author_url"));
+                    googleReviews.add(review);
+                    def_googleReviews.add(review);
+                    noGoogleReviews = false;
+                }
             }
-
+            else{
+                noGoogleReviews = true;
+            }
         }
         catch(JSONException e){
             e.printStackTrace();
@@ -151,11 +162,13 @@ public class ReviewsTab extends Fragment {
 
         context = view.getContext();
         recyclerView = (RecyclerView) view.findViewById(R.id.list);
-
-//        Log.i("REVIEWS",googleReviews.get(0).getAuthor_name());
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(context));
+
+
         recyclerView.setAdapter(new MyReviewsRecyclerViewAdapter(googleReviews, "google_reviews"));
+
+
 
         Spinner reviewType = view.findViewById(R.id.reviewType);
         reviewType.setOnItemSelectedListener(itemSelectedListener);
