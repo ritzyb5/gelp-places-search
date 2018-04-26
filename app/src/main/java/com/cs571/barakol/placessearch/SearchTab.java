@@ -70,7 +70,12 @@ public class SearchTab extends Fragment implements LocationListener{
                 Log.i("MYERR","CLICKED");
                 EditText keywordTxt = getActivity().findViewById(R.id.keyword_txt);
                 RadioButton locRadioBtn = getActivity().findViewById(R.id.from_loc);
+                EditText locTxtView = getActivity().findViewById(R.id.locTextView);
                 searchResultList = new ArrayList<>();
+                boolean is_error = false;
+
+                AutoCompleteTextView locTxt = getActivity().findViewById(R.id.locTextView);
+                String location = locTxt.getText().toString();
 
                 URL_DATA = getString(R.string.url);
 
@@ -78,21 +83,28 @@ public class SearchTab extends Fragment implements LocationListener{
                 if(keyword==""|| keyword.matches("^\\s*$")){
                     TextView keywordErr = getActivity().findViewById(R.id.keywordErr);
                     keywordErr.setVisibility(View.VISIBLE);
+                    is_error = true;
                     Toast.makeText(getContext(),
                             "Please fix all fields with errors", Toast.LENGTH_SHORT).show();
                 }
-//                else if(locRadioBtn.isChecked()){
-                AutoCompleteTextView locTxt = getActivity().findViewById(R.id.locTextView);
-                String location = locTxt.getText().toString();
-                if(location=="" ||location.matches("^\\s*$")){
-                    TextView locErr = getActivity().findViewById(R.id.locErr);
-                    locErr.setVisibility(View.VISIBLE);
+                else
+                    is_error=false;
+                if(locTxtView.isEnabled()){
+//                    AutoCompleteTextView locTxt = getActivity().findViewById(R.id.locTextView);
+                    location = locTxt.getText().toString();
+                    if(location=="" ||location.matches("^\\s*$")){
+                        TextView locErr = getActivity().findViewById(R.id.locErr);
+                        locErr.setVisibility(View.VISIBLE);
 
-                    Toast.makeText(getContext(),
-                            "Please fix all fields with errors", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getContext(),
+                                "Please fix all fields with errors", Toast.LENGTH_SHORT).show();
+                        is_error = true;
+                    }
+                    else
+                        is_error = false;
                 }
-//                }
-                else{
+
+                if(!is_error){
                     String tmp_keyword = keyword.replace(" ","+");
                     EditText distanceTxt = getActivity().findViewById(R.id.dist_txt);
                     String distance = distanceTxt.getText().toString();
