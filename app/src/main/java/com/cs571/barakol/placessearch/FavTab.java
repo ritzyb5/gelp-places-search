@@ -11,6 +11,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,6 +25,8 @@ public class FavTab extends Fragment {
 
     Activity activity;
     PlacesSearchResultAdapter placesSearchResultAdapter;
+
+    TextView errorText;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -39,23 +42,29 @@ public class FavTab extends Fragment {
         customSharedPreference = new CustomSharedPreference();
         favorites = customSharedPreference.getFavorites(activity);
 
+        errorText = view.findViewById(R.id.error_favTextView);
+
         if (favorites == null) {
-            Log.i("NO_FAV","NIL");
+            errorText.setVisibility(View.VISIBLE);
         } else {
 
             if (favorites.size() == 0) {
-                Log.i("NO_FAV_2","NIL");
+                errorText.setVisibility(View.VISIBLE);
             }
+            else{
+                errorText.setVisibility(View.INVISIBLE);
 
-            favoriteList = (RecyclerView) view.findViewById(R.id.favRecyclerView);
-            favoriteList.setHasFixedSize(true);
-            favoriteList.setLayoutManager(new LinearLayoutManager(getContext()));
+                favoriteList = (RecyclerView) view.findViewById(R.id.favRecyclerView);
+                favoriteList.setHasFixedSize(true);
+                favoriteList.setLayoutManager(new LinearLayoutManager(getContext()));
 
-            if (favorites != null) {
-                placesSearchResultAdapter = new PlacesSearchResultAdapter(activity, favorites, "favTab");
-                favoriteList.setAdapter(placesSearchResultAdapter);
+                if (favorites != null) {
+                    placesSearchResultAdapter = new PlacesSearchResultAdapter(activity, favorites, "favTab");
+                    favoriteList.setAdapter(placesSearchResultAdapter);
 
+                }
             }
+//            placesSearchResultAdapter.notifyDataSetChanged();
         }
         return view;
     }
@@ -66,22 +75,25 @@ public class FavTab extends Fragment {
         favorites = customSharedPreference.getFavorites(activity);
 
         if (favorites == null) {
-            Log.i("NO_FAV","NIL");
+            errorText.setVisibility(View.VISIBLE);
         } else {
 
             if (favorites.size() == 0) {
-                Log.i("NO_FAV_2", "NIL");
+                errorText.setVisibility(View.VISIBLE);
             }
+            else{
+                errorText.setVisibility(View.INVISIBLE);
+                favoriteList = getActivity().findViewById(R.id.favRecyclerView);
+                favoriteList.setHasFixedSize(true);
+                favoriteList.setLayoutManager(new LinearLayoutManager(getContext()));
 
-            favoriteList = getActivity().findViewById(R.id.favRecyclerView);
-            favoriteList.setHasFixedSize(true);
-            favoriteList.setLayoutManager(new LinearLayoutManager(getContext()));
+                if (favorites != null) {
+                    placesSearchResultAdapter = new PlacesSearchResultAdapter(activity, favorites, "favTab");
+                    favoriteList.setAdapter(placesSearchResultAdapter);
 
-            if (favorites != null) {
-                placesSearchResultAdapter = new PlacesSearchResultAdapter(activity, favorites, "favTab");
-                favoriteList.setAdapter(placesSearchResultAdapter);
-
+                }
             }
         }
+//        placesSearchResultAdapter.notifyDataSetChanged();
     }
 }

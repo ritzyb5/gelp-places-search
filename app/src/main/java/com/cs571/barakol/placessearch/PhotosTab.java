@@ -13,6 +13,7 @@ import android.view.ViewGroup;
 import android.widget.GridLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import com.google.android.gms.location.places.GeoDataClient;
 import com.google.android.gms.location.places.PlacePhotoMetadata;
@@ -29,6 +30,7 @@ import java.util.List;
 public class PhotosTab extends Fragment {
     private GeoDataClient mGeoDataClient;
     private List<PlacePhotoMetadata> photosList;
+    private TextView errorTextView;
 
     @Nullable
     @Override
@@ -36,6 +38,7 @@ public class PhotosTab extends Fragment {
         View view = inflater.inflate(R.layout.fragment_place_details_photos, container, false);
         mGeoDataClient = Places.getGeoDataClient(getActivity());
         String place_id = getArguments().getString("place_id");
+        errorTextView = view.findViewById(R.id.error_photos_TextView);
         getPhotos(place_id);
         return view;
     }
@@ -58,29 +61,38 @@ public class PhotosTab extends Fragment {
 
                 // Get the first photo in the list.
                 int size = photoMetadataBuffer.getCount();
-                for(int i=0;i<size;i++){
-                    PlacePhotoMetadata photoMetadata = photoMetadataBuffer.get(i);
+                if(size==0){
+                    errorTextView.setVisibility(View.VISIBLE);
+                    errorTextView.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+                    errorTextView.setPadding(400,600,0,0);
+                }
+                else{
+                    errorTextView.setVisibility(View.GONE);
+                    errorTextView.setLayoutParams(new LinearLayout.LayoutParams(0,0));
+                    for(int i=0;i<size;i++){
+                        PlacePhotoMetadata photoMetadata = photoMetadataBuffer.get(i);
 
-                    // Get a full-size bitmap for the photo.
-                    Task<PlacePhotoResponse> photoResponse = mGeoDataClient.getPhoto(photoMetadata);
-                    photoResponse.addOnCompleteListener(new OnCompleteListener<PlacePhotoResponse>() {
-                        @Override
-                        public void onComplete(@NonNull Task<PlacePhotoResponse> task) {
-                            PlacePhotoResponse photo = task.getResult();
-                            Bitmap bitmap = photo.getBitmap();
-                            ImageView image = new ImageView(getContext());
+                        // Get a full-size bitmap for the photo.
+                        Task<PlacePhotoResponse> photoResponse = mGeoDataClient.getPhoto(photoMetadata);
+                        photoResponse.addOnCompleteListener(new OnCompleteListener<PlacePhotoResponse>() {
+                            @Override
+                            public void onComplete(@NonNull Task<PlacePhotoResponse> task) {
+                                PlacePhotoResponse photo = task.getResult();
+                                Bitmap bitmap = photo.getBitmap();
+                                ImageView image = new ImageView(getContext());
 
-                            image.setImageBitmap(bitmap);
-                            image.setPadding(20,20,20,20);
-                            image.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
-                            image.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
-                            image.setAdjustViewBounds(true);
-                            // image.getLayoutParams().width = ViewGroup.LayoutParams.MATCH_PARENT;
+                                image.setImageBitmap(bitmap);
+                                image.setPadding(20,20,20,20);
+                                image.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
+                                image.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
+                                image.setAdjustViewBounds(true);
+                                // image.getLayoutParams().width = ViewGroup.LayoutParams.MATCH_PARENT;
 //                            image.setScaleType(ImageView.ScaleType.FIT_XY);
-                            LinearLayout layout =  getActivity().findViewById(R.id.photosTab);
-                              layout.addView(image);
-                        }
-                    });
+                                LinearLayout layout =  getActivity().findViewById(R.id.photosTab);
+                                layout.addView(image);
+                            }
+                        });
+                    }
                 }
             }
         });

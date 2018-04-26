@@ -11,7 +11,6 @@ import android.widget.ImageView;
 import android.widget.RatingBar;
 import android.widget.TextView;
 
-import com.cs571.barakol.placessearch.dummy.DummyContent.DummyItem;
 import com.squareup.picasso.Picasso;
 
 import java.text.DateFormat;
@@ -75,7 +74,6 @@ public class MyReviewsRecyclerViewAdapter extends RecyclerView.Adapter<MyReviews
         private  TextView review_text;
         private final Context context;
 
-        public DummyItem mItem;
 
         public ViewHolder(View view) {
             super(view);

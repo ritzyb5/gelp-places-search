@@ -3,6 +3,7 @@ package com.cs571.barakol.placessearch;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -14,6 +15,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.Request;
@@ -36,6 +38,7 @@ public class SearchResultsActivity extends AppCompatActivity{
     private ArrayList<PlacesSearchResult> placesResultsList;
     private ArrayList<ArrayList<PlacesSearchResult>> prevResultList;
     private String next_page_token;
+    private String no_result;
 
 
     @Override
@@ -55,40 +58,64 @@ public class SearchResultsActivity extends AppCompatActivity{
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        next_page_token = i.getStringExtra("next_page_token");
-        placesResultsList =  i.getParcelableArrayListExtra("placesJSON");
+        no_result ="false";
+        no_result = i.getStringExtra("no_result");
+        Log.i("REQ_ERR",no_result);
+        TextView errorTextView = findViewById(R.id.errorTextView);
 
-        mRecyclerView = (RecyclerView) findViewById(R.id.placesResultView);
-        mRecyclerView.setHasFixedSize(true);
-        mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        if(no_result.equals("true")){
+            errorTextView.setVisibility(View.VISIBLE);
+            Button prevBtn = findViewById(R.id.searchResultPrevBtn);
+            prevBtn.setVisibility(View.INVISIBLE);
 
-        adapter = new PlacesSearchResultAdapter(this,placesResultsList,"detailsTab");
-        mRecyclerView.setAdapter(adapter);
+            Button nextBtn = findViewById(R.id.searchResultNextBtn);
+            nextBtn.setVisibility(View.INVISIBLE);
+        }
+        else{
+            errorTextView.setVisibility(View.INVISIBLE);
+            Log.i("REQ_ERR","no err");
+            next_page_token = i.getStringExtra("next_page_token");
+            placesResultsList =  i.getParcelableArrayListExtra("placesJSON");
 
-        Log.i("CREATE_ACTIVITY","search result");
-        Button nextBtn = findViewById(R.id.searchResultNextBtn);
-        nextBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Log.i("BTN","next clicked");
-                prevResultList.add(placesResultsList);
-                getNextPageResult();
-                findViewById(R.id.searchResultPrevBtn).setEnabled(true);
+            mRecyclerView = (RecyclerView) findViewById(R.id.placesResultView);
+            mRecyclerView.setHasFixedSize(true);
+            mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-            }
-        });
+            adapter = new PlacesSearchResultAdapter(this,placesResultsList,"detailsTab");
+            mRecyclerView.setAdapter(adapter);
 
-        Button prevBtn = findViewById(R.id.searchResultPrevBtn);
-        prevBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                adapter = new PlacesSearchResultAdapter(getApplicationContext(),prevResultList.remove(prevResultList.size()-1),"detailsTab");
-                mRecyclerView.setAdapter(adapter);
-                if(prevResultList.size()==0)
-                    view.setEnabled(false);
-                findViewById(R.id.searchResultNextBtn).setEnabled(true);
-            }
-        });
+            Log.i("CREATE_ACTIVITY","search result");
+            Button nextBtn = findViewById(R.id.searchResultNextBtn);
+            nextBtn.setVisibility(View.VISIBLE);
+            if(next_page_token.isEmpty())
+                nextBtn.setEnabled(false);
+            nextBtn.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Log.i("BTN","next clicked");
+                    prevResultList.add(placesResultsList);
+                    getNextPageResult();
+                    findViewById(R.id.searchResultPrevBtn).setEnabled(true);
+
+                }
+            });
+
+            Button prevBtn = findViewById(R.id.searchResultPrevBtn);
+            prevBtn.setVisibility(View.VISIBLE);
+            prevBtn.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    adapter = new PlacesSearchResultAdapter(getApplicationContext(),prevResultList.remove(prevResultList.size()-1),"detailsTab");
+                    mRecyclerView.setAdapter(adapter);
+                    if(prevResultList.size()==0)
+                        view.setEnabled(false);
+                    findViewById(R.id.searchResultNextBtn).setEnabled(true);
+                }
+            });
+
+        }
+
+
     }
 
     private void getNextPageResult(){
@@ -149,8 +176,10 @@ public class SearchResultsActivity extends AppCompatActivity{
     @Override
     protected void onPostResume() {
         super.onPostResume();
-        adapter = new PlacesSearchResultAdapter(getApplicationContext(),placesResultsList,"detailsTab");
-        mRecyclerView.setAdapter(adapter);
+        if(no_result.equals("false")){
+            adapter = new PlacesSearchResultAdapter(getApplicationContext(),placesResultsList,"detailsTab");
+            mRecyclerView.setAdapter(adapter);
+        }
     }
 
 

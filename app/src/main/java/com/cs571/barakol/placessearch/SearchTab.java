@@ -12,6 +12,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -95,11 +96,14 @@ public class SearchTab extends Fragment implements LocationListener{
                     String tmp_keyword = keyword.replace(" ","+");
                     EditText distanceTxt = getActivity().findViewById(R.id.dist_txt);
                     String distance = distanceTxt.getText().toString();
+                    if(distance.isEmpty())
+                        distance="10";
 
                     RadioButton hereRadioBtn = getActivity().findViewById(R.id.from_here);
 
                     Spinner categoryVal = getActivity().findViewById(R.id.category);
                     String category = categoryVal.getSelectedItem().toString();
+                    category = category.replaceAll(" ", "_").toLowerCase();
 
                     String tmp_location="";
                     String from;
@@ -141,28 +145,40 @@ public class SearchTab extends Fragment implements LocationListener{
                     final ProgressDialog progressDialog = new ProgressDialog(getContext());
                     progressDialog.setMessage("Fetching Results");
                     progressDialog.show();
-                    Log.i("URL_DATA",URL_DATA);
                     StringRequest stringRequest = new StringRequest(Request.Method.GET, URL_DATA, new Response.Listener<String>() {
                         @Override
                         public void onResponse(String response) {
                             progressDialog.dismiss();
+                            Intent intent = new Intent(getActivity(),SearchResultsActivity.class);
                             try {
                                 JSONObject jsonObject = new JSONObject(response);
-                                JSONArray jsonArray = jsonObject.getJSONArray("results");
-                                Log.i("PLACESJSON", "Places Output: "+ jsonObject.toString());
+                                if(!jsonObject.getString("status").equals("OK")){
+                                    Log.i("REQ_ERR","not ok");
+                                    intent.putExtra("no_result","true");
+                                    startActivity(intent);
+                                }
+                                else{
+                                    JSONArray jsonArray = jsonObject.getJSONArray("results");
+                                    Log.i("PLACESJSON", "Places Output: "+ jsonObject.toString());
 
-                                for (int i = 0; i < jsonArray.length(); i++) {
-                                    JSONObject jo = jsonArray.getJSONObject(i);
-                                    PlacesSearchResult places = new PlacesSearchResult(jo.getString("name"),jo.getString("vicinity"), jo.getString("icon"), jo.getString("place_id"));
-                                    searchResultList.add(places);
-                                    Log.i("PLACE","Name: "+places.getPlaceName()+"ID: "+places.getPlaceId()+" Address: "+places.getAddress()+"Icon: "+places.getImage_url());
+                                    for (int i = 0; i < jsonArray.length(); i++) {
+                                        JSONObject jo = jsonArray.getJSONObject(i);
+                                        PlacesSearchResult places = new PlacesSearchResult(jo.getString("name"),jo.getString("vicinity"), jo.getString("icon"), jo.getString("place_id"));
+                                        searchResultList.add(places);
+                                        Log.i("PLACE","Name: "+places.getPlaceName()+"ID: "+places.getPlaceId()+" Address: "+places.getAddress()+"Icon: "+places.getImage_url());
+                                    }
+
+                                    String next_page_token="";
+                                    if(jsonObject.has("next_page_token")){
+                                      next_page_token = jsonObject.getString("next_page_token");
+                                    }
+
+                                    intent.putExtra("no_result","false");
+                                    intent.putExtra("next_page_token",next_page_token);
+                                    intent.putParcelableArrayListExtra("placesJSON", searchResultList);
+                                    startActivity(intent);
                                 }
 
-                                String next_page_token = jsonObject.getString("next_page_token");
-                                Intent intent = new Intent(getActivity(),SearchResultsActivity.class);
-                                intent.putExtra("next_page_token",next_page_token);
-                                intent.putParcelableArrayListExtra("placesJSON", searchResultList);
-                                startActivity(intent);
 
                             } catch (JSONException e) {
                                 e.printStackTrace();
@@ -171,6 +187,13 @@ public class SearchTab extends Fragment implements LocationListener{
                     }, new Response.ErrorListener() {
                         @Override
                         public void onErrorResponse(VolleyError error) {
+                            progressDialog.dismiss();
+//                            Intent intent = new Intent(getActivity(),SearchResultsActivity.class);
+//                            intent.putExtra("no_result","true");
+                            Log.i("REQ_ERR_1",error.toString());
+//                            startActivity(intent);
+
+
                             Toast.makeText(getContext(), "Error"+error.toString(), Toast.LENGTH_SHORT).show();
                         }
                     });
