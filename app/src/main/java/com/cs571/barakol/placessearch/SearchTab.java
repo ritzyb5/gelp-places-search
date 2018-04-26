@@ -81,17 +81,17 @@ public class SearchTab extends Fragment implements LocationListener{
                     Toast.makeText(getContext(),
                             "Please fix all fields with errors", Toast.LENGTH_SHORT).show();
                 }
-                else if(locRadioBtn.isChecked()){
-                    AutoCompleteTextView locTxt = getActivity().findViewById(R.id.locTextView);
-                    String location = locTxt.getText().toString();
-                    if(location=="" ||location.matches("^\\s*$")){
-                        TextView locErr = getActivity().findViewById(R.id.locErr);
-                        locErr.setVisibility(View.VISIBLE);
+//                else if(locRadioBtn.isChecked()){
+                AutoCompleteTextView locTxt = getActivity().findViewById(R.id.locTextView);
+                String location = locTxt.getText().toString();
+                if(location=="" ||location.matches("^\\s*$")){
+                    TextView locErr = getActivity().findViewById(R.id.locErr);
+                    locErr.setVisibility(View.VISIBLE);
 
-                        Toast.makeText(getContext(),
-                                "Please fix all fields with errors", Toast.LENGTH_SHORT).show();
-                    }
+                    Toast.makeText(getContext(),
+                            "Please fix all fields with errors", Toast.LENGTH_SHORT).show();
                 }
+//                }
                 else{
                     String tmp_keyword = keyword.replace(" ","+");
                     EditText distanceTxt = getActivity().findViewById(R.id.dist_txt);
@@ -129,8 +129,8 @@ public class SearchTab extends Fragment implements LocationListener{
                     }
                     else{//get location text
                         from="loc";
-                        EditText locTxt = getActivity().findViewById(R.id.locTextView);
-                        String location = locTxt.getText().toString().trim();
+//                        EditText locTxt = getActivity().findViewById(R.id.locTextView);
+//                        String location = locTxt.getText().toString().trim();
                         tmp_location = location.replace(" ","+");
 
                         URL_DATA += "&locTxt="+ tmp_location;
