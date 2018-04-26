@@ -60,6 +60,7 @@ public class ReviewsTab extends Fragment {
     private String orderType="Default Order";
     private  boolean noGoogleReviews;
     private boolean noYelpReviews;
+    TextView errorTextView;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -90,68 +91,69 @@ public class ReviewsTab extends Fragment {
 
         noGoogleReviews = false;
         noYelpReviews = false;
+        errorTextView = getActivity().findViewById(R.id.error_reviewsTextView);
 
         if (getArguments() != null) {
             jsonStr = getArguments().getString("PLACES_JSON");
-        }
 
-        //Get the Google Reviews
-        try {
-            JSONObject jsonObject = new JSONObject(jsonStr);
+            //Get the Google Reviews
+            try {
+                JSONObject jsonObject = new JSONObject(jsonStr);
 //            placeDetailsJSON = jsonObject.getJSONObject("result");
-            URL_DATA = getResources().getString(R.string.url)+"/yelpReviews?name="+jsonObject.getString("name").replace(' ','+');
-            URL_DATA += "&latitude="+jsonObject.getJSONObject("geometry").getJSONObject("location").getString("lat");
-            URL_DATA += "&longitude="+jsonObject.getJSONObject("geometry").getJSONObject("location").getString("lng");
+                URL_DATA = getResources().getString(R.string.url)+"/yelpReviews?name="+jsonObject.getString("name").replace(' ','+');
+                URL_DATA += "&latitude="+jsonObject.getJSONObject("geometry").getJSONObject("location").getString("lat");
+                URL_DATA += "&longitude="+jsonObject.getJSONObject("geometry").getJSONObject("location").getString("lng");
 
-            String state="",country="",address1="",city="";
-            JSONArray address_components = jsonObject.getJSONArray("address_components");
-            for(int i = 0; i <address_components.length(); i++){
-                JSONObject addr = (JSONObject)address_components.get(i);
-                JSONArray addr_types = addr.getJSONArray("types");
-                Log.i("YELP_URL",addr_types.get(0).toString());
-                if(addr_types.get(0).toString().equals("administrative_area_level_1"))  state = addr.getString("short_name");
-                if(addr_types.get(0).toString().equals("country"))  country = addr.getString("short_name");
-                if(addr_types.get(0).toString().equals("route"))  address1 = addr.getString("short_name").replace(' ','+');
-                if(addr_types.get(0).toString().equals("locality"))  city = addr.getString("short_name").replace(' ','+');
+                String state="",country="",address1="",city="";
+                JSONArray address_components = jsonObject.getJSONArray("address_components");
+                for(int i = 0; i <address_components.length(); i++){
+                    JSONObject addr = (JSONObject)address_components.get(i);
+                    JSONArray addr_types = addr.getJSONArray("types");
+                    Log.i("YELP_URL",addr_types.get(0).toString());
+                    if(addr_types.get(0).toString().equals("administrative_area_level_1"))  state = addr.getString("short_name");
+                    if(addr_types.get(0).toString().equals("country"))  country = addr.getString("short_name");
+                    if(addr_types.get(0).toString().equals("route"))  address1 = addr.getString("short_name").replace(' ','+');
+                    if(addr_types.get(0).toString().equals("locality"))  city = addr.getString("short_name").replace(' ','+');
 
-            }
+                }
 
-            URL_DATA += "&address1="+address1;//jsonObject.getString("formatted_address").replace(' ','+');
-            URL_DATA += "&city="+city;
-            URL_DATA += "&state="+state;
-            URL_DATA += "&country="+country;
+                URL_DATA += "&address1="+address1;//jsonObject.getString("formatted_address").replace(' ','+');
+                URL_DATA += "&city="+city;
+                URL_DATA += "&state="+state;
+                URL_DATA += "&country="+country;
 
 
-            Log.i("YELP_URL",URL_DATA);
+                Log.i("YELP_URL",URL_DATA);
 
-            JSONArray reviewsArr =jsonObject.getJSONArray("reviews");
-            if(reviewsArr.length()>0){
-                for(int i=0; i<reviewsArr.length(); i++){
-                    JSONObject reviewsObj = reviewsArr.getJSONObject(i);
+                JSONArray reviewsArr =jsonObject.getJSONArray("reviews");
+//                Log.i("G_REV",Integer.toString(reviewsArr.length()));
+                if(reviewsArr.length()>0){
+                    for(int i=0; i<reviewsArr.length(); i++){
+                        JSONObject reviewsObj = reviewsArr.getJSONObject(i);
 
-                    //Rating
-                    Double rate_val = reviewsObj.getDouble("rating");
-                    Float rate_float = rate_val.floatValue();
+                        //Rating
+                        Double rate_val = reviewsObj.getDouble("rating");
+                        Float rate_float = rate_val.floatValue();
 
-                    //Date
-                    Date rating_date = new Date((Long.parseLong(reviewsObj.getString("time")))*1000);
-                    DateFormat formatted_rating_date = new SimpleDateFormat("yyyy-mm-dd HH:mm:ss");
+                        //Date
+                        Date rating_date = new Date((Long.parseLong(reviewsObj.getString("time")))*1000);
+                        DateFormat formatted_rating_date = new SimpleDateFormat("yyyy-mm-dd HH:mm:ss");
 
-                    CustomReviewDetails review = new CustomReviewDetails(reviewsObj.getString("profile_photo_url"),reviewsObj.getString("author_name"),rate_float, formatted_rating_date.format(rating_date),reviewsObj.getString("text"),reviewsObj.getString("author_url"));
-                    googleReviews.add(review);
-                    def_googleReviews.add(review);
-                    noGoogleReviews = false;
+                        CustomReviewDetails review = new CustomReviewDetails(reviewsObj.getString("profile_photo_url"),reviewsObj.getString("author_name"),rate_float, formatted_rating_date.format(rating_date),reviewsObj.getString("text"),reviewsObj.getString("author_url"));
+                        googleReviews.add(review);
+                        def_googleReviews.add(review);
+                        noGoogleReviews = false;
+                    }
+                }
+                else{
+                    noGoogleReviews = true;
                 }
             }
-            else{
-                noGoogleReviews = true;
+            catch(JSONException e){
+                e.printStackTrace();
             }
-        }
-        catch(JSONException e){
-            e.printStackTrace();
-        }
 
-
+        }
     }
 
     @Override
@@ -167,7 +169,7 @@ public class ReviewsTab extends Fragment {
 
         recyclerView.setAdapter(new MyReviewsRecyclerViewAdapter(googleReviews, "google_reviews"));
 
-
+        errorTextView = view.findViewById(R.id.error_reviewsTextView);
 
         Spinner reviewType = view.findViewById(R.id.reviewType);
         reviewType.setOnItemSelectedListener(itemSelectedListener);
@@ -202,24 +204,37 @@ public class ReviewsTab extends Fragment {
                     public void onResponse(String response) {
                         progressDialog.dismiss();
                         try {
+
                             JSONArray yelpReviewsArr = new JSONArray(response);
-//                                JSONArray yelpReviewsArr = jsonObject.getJSONArray("reviews");
+//                            Log.i("YELP_ERR_2",response);
+                            if(yelpReviews.isEmpty()){
+                                Log.i("YELP_ERR","error");
+                                errorTextView.setVisibility(View.VISIBLE);
+                                recyclerView.setVisibility(View.INVISIBLE);
+                            }
+                            else{
+                                errorTextView.setVisibility(View.INVISIBLE);
+                                recyclerView.setVisibility(View.VISIBLE);
+                                for(int i=0; i<yelpReviewsArr.length(); i++){
+                                    JSONObject reviews = (JSONObject)yelpReviewsArr.get(i);
 
-                            for(int i=0; i<yelpReviewsArr.length(); i++){
-                                JSONObject reviews = (JSONObject)yelpReviewsArr.get(i);
+                                    //Rating
+                                    Double rate_val = reviews.getDouble("rating");
+                                    Float rate_float = rate_val.floatValue();
 
-                                //Rating
-                                Double rate_val = reviews.getDouble("rating");
-                                Float rate_float = rate_val.floatValue();
+                                    CustomReviewDetails review = new CustomReviewDetails(reviews.getJSONObject("user").getString("image_url"),reviews.getJSONObject("user").getString("name"),rate_float, reviews.getString("time_created"),reviews.getString("text"),reviews.getString("url"));
 
-                                CustomReviewDetails review = new CustomReviewDetails(reviews.getJSONObject("user").getString("image_url"),reviews.getJSONObject("user").getString("name"),rate_float, reviews.getString("time_created"),reviews.getString("text"),reviews.getString("url"));
+                                    yelpReviews.add(review);
+                                    def_yelpReviews.add(review);
+                                }
 
-                                yelpReviews.add(review);
-                                def_yelpReviews.add(review);
+                                orderReviews(orderType);
+                                recyclerView.setAdapter(new MyReviewsRecyclerViewAdapter(yelpReviews,"yelp_reviews"));
+
                             }
 
-                            orderReviews(orderType);
-                            recyclerView.setAdapter(new MyReviewsRecyclerViewAdapter(yelpReviews,"yelp_reviews"));
+//                                JSONArray yelpReviewsArr = jsonObject.getJSONArray("reviews");
+
 
                         } catch (JSONException e) {
                             e.printStackTrace();
@@ -230,6 +245,7 @@ public class ReviewsTab extends Fragment {
                 }, new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
+                        Log.i("YELP","no revs");
                         Toast.makeText(context, "Error"+error.toString(), Toast.LENGTH_SHORT).show();
                     }
                 });
@@ -260,145 +276,159 @@ public class ReviewsTab extends Fragment {
     };
 
     private void orderReviews(String selectedItem){
-        if(selectedItem.equals("Default Order")){
-            if(reviewTypeVal.equals("Google Reviews")){
-                googleReviews = def_googleReviews;
-                recyclerView.setAdapter(new MyReviewsRecyclerViewAdapter(googleReviews, "google_reviews"));
-            }
-            else{
-                yelpReviews = def_yelpReviews;
-                recyclerView.setAdapter(new MyReviewsRecyclerViewAdapter(yelpReviews, "yelp_reviews"));
-            }
-
+        if(reviewTypeVal.equals("Google Reviews") && googleReviews.isEmpty()){
+            errorTextView.setVisibility(View.VISIBLE);
+            recyclerView.setVisibility(View.INVISIBLE);
         }
-        else if(selectedItem.equals("Highest Rating")){
-            if(reviewTypeVal.equals("Google Reviews")){
-                Collections.sort(googleReviews, new Comparator<CustomReviewDetails>() {
-                    @Override
-                    public int compare(CustomReviewDetails reviewDetails, CustomReviewDetails t1) {
-                        return (int)(t1.getReview_rating() - reviewDetails.getReview_rating());
-                    }
-                });
-
-                recyclerView.setAdapter(new MyReviewsRecyclerViewAdapter(googleReviews, "google_reviews"));
-            }
-            else{
-                Collections.sort(yelpReviews, new Comparator<CustomReviewDetails>() {
-                    @Override
-                    public int compare(CustomReviewDetails reviewDetails, CustomReviewDetails t1) {
-                        return (int)(t1.getReview_rating() - reviewDetails.getReview_rating());
-                    }
-                });
-
-                recyclerView.setAdapter(new MyReviewsRecyclerViewAdapter(yelpReviews, "yelp_reviews"));
-            }
-
+        if(reviewTypeVal.equals("Yelp Reviews") && yelpReviews.isEmpty()){
+            errorTextView.setVisibility(View.VISIBLE);
+            recyclerView.setVisibility(View.INVISIBLE);
         }
-        else if(selectedItem.equals("Lowest Rating")){
-            if(reviewTypeVal.equals("Google Reviews")){
-                Collections.sort(googleReviews, new Comparator<CustomReviewDetails>() {
-                    @Override
-                    public int compare(CustomReviewDetails reviewDetails, CustomReviewDetails t1) {
-                        return (int)(reviewDetails.getReview_rating() - t1.getReview_rating());
-                    }
-                });
+        else{
+            errorTextView.setVisibility(View.INVISIBLE);
+            recyclerView.setVisibility(View.VISIBLE);
 
-                recyclerView.setAdapter(new MyReviewsRecyclerViewAdapter(googleReviews, "google_reviews"));
+            if(selectedItem.equals("Default Order")){
+                if(reviewTypeVal.equals("Google Reviews")){
+                    googleReviews = def_googleReviews;
+                    recyclerView.setAdapter(new MyReviewsRecyclerViewAdapter(googleReviews, "google_reviews"));
+                }
+                else{
+                    yelpReviews = def_yelpReviews;
+                    recyclerView.setAdapter(new MyReviewsRecyclerViewAdapter(yelpReviews, "yelp_reviews"));
+                }
+
             }
-            else{
-                Collections.sort(yelpReviews, new Comparator<CustomReviewDetails>() {
-                    @Override
-                    public int compare(CustomReviewDetails reviewDetails, CustomReviewDetails t1) {
-                        return (int)(reviewDetails.getReview_rating() - t1.getReview_rating());
-                    }
-                });
+            else if(selectedItem.equals("Highest Rating")){
+                if(reviewTypeVal.equals("Google Reviews")){
+                    Collections.sort(googleReviews, new Comparator<CustomReviewDetails>() {
+                        @Override
+                        public int compare(CustomReviewDetails reviewDetails, CustomReviewDetails t1) {
+                            return (int)(t1.getReview_rating() - reviewDetails.getReview_rating());
+                        }
+                    });
 
-                recyclerView.setAdapter(new MyReviewsRecyclerViewAdapter(yelpReviews, "yelp_reviews"));
+                    recyclerView.setAdapter(new MyReviewsRecyclerViewAdapter(googleReviews, "google_reviews"));
+                }
+                else{
+                    Collections.sort(yelpReviews, new Comparator<CustomReviewDetails>() {
+                        @Override
+                        public int compare(CustomReviewDetails reviewDetails, CustomReviewDetails t1) {
+                            return (int)(t1.getReview_rating() - reviewDetails.getReview_rating());
+                        }
+                    });
+
+                    recyclerView.setAdapter(new MyReviewsRecyclerViewAdapter(yelpReviews, "yelp_reviews"));
+                }
+
+            }
+            else if(selectedItem.equals("Lowest Rating")){
+                if(reviewTypeVal.equals("Google Reviews")){
+                    Collections.sort(googleReviews, new Comparator<CustomReviewDetails>() {
+                        @Override
+                        public int compare(CustomReviewDetails reviewDetails, CustomReviewDetails t1) {
+                            return (int)(reviewDetails.getReview_rating() - t1.getReview_rating());
+                        }
+                    });
+
+                    recyclerView.setAdapter(new MyReviewsRecyclerViewAdapter(googleReviews, "google_reviews"));
+                }
+                else{
+                    Collections.sort(yelpReviews, new Comparator<CustomReviewDetails>() {
+                        @Override
+                        public int compare(CustomReviewDetails reviewDetails, CustomReviewDetails t1) {
+                            return (int)(reviewDetails.getReview_rating() - t1.getReview_rating());
+                        }
+                    });
+
+                    recyclerView.setAdapter(new MyReviewsRecyclerViewAdapter(yelpReviews, "yelp_reviews"));
+                }
+            }
+            else if(selectedItem.equals("Most Recent")){
+                if(reviewTypeVal.equals("Google Reviews")){
+                    Collections.sort(googleReviews, new Comparator<CustomReviewDetails>() {
+                        @Override
+                        public int compare(CustomReviewDetails reviewDetails, CustomReviewDetails t1) {
+                            Date date1=null,date2=null;
+                            try{
+                                date1 = new SimpleDateFormat("yyyy-mm-dd HH:mm:ss").parse(reviewDetails.getReview_date());
+                                date2 = new SimpleDateFormat("yyyy-mm-dd HH:mm:ss").parse(t1.getReview_date());
+                                Log.i("G_D",date1.toString());
+                            }
+                            catch (ParseException e){
+                                e.printStackTrace();
+                            }
+
+                            return date2.compareTo(date1);
+                        }
+                    });
+
+                    recyclerView.setAdapter(new MyReviewsRecyclerViewAdapter(googleReviews, "google_reviews"));
+                }
+                else{
+                    Collections.sort(yelpReviews, new Comparator<CustomReviewDetails>() {
+                        @Override
+                        public int compare(CustomReviewDetails reviewDetails, CustomReviewDetails t1) {
+                            Date date1=null,date2=null;
+                            try{
+                                date1 = new SimpleDateFormat("yyyy-mm-dd HH:mm:ss").parse(reviewDetails.getReview_date());
+                                date2 = new SimpleDateFormat("yyyy-mm-dd HH:mm:ss").parse(t1.getReview_date());
+                            }
+                            catch (ParseException e){
+                                e.printStackTrace();
+                            }
+
+                            return date2.compareTo(date1);
+                        }
+                    });
+
+                    recyclerView.setAdapter(new MyReviewsRecyclerViewAdapter(yelpReviews, "yelp_reviews"));
+                }
+
+            }
+            else if(selectedItem.equals("Least Recent")){
+                if(reviewTypeVal.equals("Google Reviews")){
+                    Collections.sort(googleReviews, new Comparator<CustomReviewDetails>() {
+                        @Override
+                        public int compare(CustomReviewDetails reviewDetails, CustomReviewDetails t1) {
+                            Date date1=null,date2=null;
+                            try{
+                                date1 = new SimpleDateFormat("yyyy-mm-dd HH:mm:ss").parse(reviewDetails.getReview_date());
+                                date2 = new SimpleDateFormat("yyyy-mm-dd HH:mm:ss").parse(t1.getReview_date());
+                                Log.i("G_D",date1.toString());
+                            }
+                            catch (ParseException e){
+                                e.printStackTrace();
+                            }
+
+                            return date1.compareTo(date2);
+                        }
+                    });
+
+                    recyclerView.setAdapter(new MyReviewsRecyclerViewAdapter(googleReviews, "google_reviews"));
+                }
+                else{
+                    Collections.sort(yelpReviews, new Comparator<CustomReviewDetails>() {
+                        @Override
+                        public int compare(CustomReviewDetails reviewDetails, CustomReviewDetails t1) {
+                            Date date1=null,date2=null;
+                            try{
+                                date1 = new SimpleDateFormat("yyyy-mm-dd HH:mm:ss").parse(reviewDetails.getReview_date());
+                                date2 = new SimpleDateFormat("yyyy-mm-dd HH:mm:ss").parse(t1.getReview_date());
+                            }
+                            catch (ParseException e){
+                                e.printStackTrace();
+                            }
+
+                            return date1.compareTo(date2);
+                        }
+                    });
+
+                    recyclerView.setAdapter(new MyReviewsRecyclerViewAdapter(yelpReviews, "yelp_reviews"));
+                }
+
             }
         }
-        else if(selectedItem.equals("Most Recent")){
-            if(reviewTypeVal.equals("Google Reviews")){
-                Collections.sort(googleReviews, new Comparator<CustomReviewDetails>() {
-                    @Override
-                    public int compare(CustomReviewDetails reviewDetails, CustomReviewDetails t1) {
-                        Date date1=null,date2=null;
-                        try{
-                            date1 = new SimpleDateFormat("yyyy-mm-dd HH:mm:ss").parse(reviewDetails.getReview_date());
-                            date2 = new SimpleDateFormat("yyyy-mm-dd HH:mm:ss").parse(t1.getReview_date());
-                            Log.i("G_D",date1.toString());
-                        }
-                        catch (ParseException e){
-                            e.printStackTrace();
-                        }
 
-                        return date2.compareTo(date1);
-                    }
-                });
-
-                recyclerView.setAdapter(new MyReviewsRecyclerViewAdapter(googleReviews, "google_reviews"));
-            }
-            else{
-                Collections.sort(yelpReviews, new Comparator<CustomReviewDetails>() {
-                    @Override
-                    public int compare(CustomReviewDetails reviewDetails, CustomReviewDetails t1) {
-                        Date date1=null,date2=null;
-                        try{
-                            date1 = new SimpleDateFormat("yyyy-mm-dd HH:mm:ss").parse(reviewDetails.getReview_date());
-                            date2 = new SimpleDateFormat("yyyy-mm-dd HH:mm:ss").parse(t1.getReview_date());
-                        }
-                        catch (ParseException e){
-                            e.printStackTrace();
-                        }
-
-                        return date2.compareTo(date1);
-                    }
-                });
-
-                recyclerView.setAdapter(new MyReviewsRecyclerViewAdapter(yelpReviews, "yelp_reviews"));
-            }
-
-        }
-        else if(selectedItem.equals("Least Recent")){
-            if(reviewTypeVal.equals("Google Reviews")){
-                Collections.sort(googleReviews, new Comparator<CustomReviewDetails>() {
-                    @Override
-                    public int compare(CustomReviewDetails reviewDetails, CustomReviewDetails t1) {
-                        Date date1=null,date2=null;
-                        try{
-                            date1 = new SimpleDateFormat("yyyy-mm-dd HH:mm:ss").parse(reviewDetails.getReview_date());
-                            date2 = new SimpleDateFormat("yyyy-mm-dd HH:mm:ss").parse(t1.getReview_date());
-                            Log.i("G_D",date1.toString());
-                        }
-                        catch (ParseException e){
-                            e.printStackTrace();
-                        }
-
-                        return date1.compareTo(date2);
-                    }
-                });
-
-                recyclerView.setAdapter(new MyReviewsRecyclerViewAdapter(googleReviews, "google_reviews"));
-            }
-            else{
-                Collections.sort(yelpReviews, new Comparator<CustomReviewDetails>() {
-                    @Override
-                    public int compare(CustomReviewDetails reviewDetails, CustomReviewDetails t1) {
-                        Date date1=null,date2=null;
-                        try{
-                            date1 = new SimpleDateFormat("yyyy-mm-dd HH:mm:ss").parse(reviewDetails.getReview_date());
-                            date2 = new SimpleDateFormat("yyyy-mm-dd HH:mm:ss").parse(t1.getReview_date());
-                        }
-                        catch (ParseException e){
-                            e.printStackTrace();
-                        }
-
-                        return date1.compareTo(date2);
-                    }
-                });
-
-                recyclerView.setAdapter(new MyReviewsRecyclerViewAdapter(yelpReviews, "yelp_reviews"));
-            }
-
-        }
     }
 }

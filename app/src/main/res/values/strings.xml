@@ -18,8 +18,8 @@
     <string name="fav">fav</string>
     <string name="no_fav">no_fav</string>
     <string name="twitter_link">https://twitter.com/intent/tweet?</string>
-    <!--<string name="url">https://electric-autumn-200304.appspot.com</string>-->
-    <string name="url">"http://10.0.2.2:3000"</string>
+    <string name="url">https://electric-autumn-200304.appspot.com</string>
+    <!--<string name="url">"http://10.0.2.2:3000"</string>-->
     <string name="info">Info</string>
     <string name="photos">Photos</string>
     <string name="map">Map</string>
